@@ -5,35 +5,42 @@ const FULL_HEART = '♥'
 // Your JavaScript code goes here!
 
 
-const glyphStates = {
-  "♡": "♥",
-  "♥": "♡"
-};
+const glyphs = document.getElementsByClassName("like-glyph");
+const errorDiv = document.getElementById('modal');
+const errorP = document.getElementById('modal-message');
 
-const colorStates = {
-  "red" : "",
-  "": "red"
-};
+errorDiv.className = 'hidden';
+errorP.innerHTML = '';
 
-const articleHearts = document.querySelectorAll(".like-glyph");
-
-function likeCallback(e) {
-  const heart = e.target;
-  mimicServerCall("bogusUrl")
-    .then(function(serverMessage){
-       heart.innerText = glyphStates[heart.innerText];
-       heart.style.color = colorStates[heart.style.color];
-    })
-    .catch(function(error) {
-      const modal = document.getElementById("modal");
-      modal.className = "";
-      modal.innerText = error;
-      setTimeout(() =>  modal.className = "hidden", 3000);
-    });
+for (let i = 0; i < glyphs.length; i++) {
+  glyphs[i].innerHTML = EMPTY_HEART;
+  glyphs[i].classList.remove('activated-heart');
 }
 
-for (const glyph of articleHearts) {
-  glyph.addEventListener("click", likeCallback);
+for (let i = 0; i < glyphs.length; i++) {
+  glyphs[i].addEventListener('click', event => {
+    const glyphSpan = event.target;
+    const glyphState = glyphSpan.classList.contains('activated-heart');
+    if (glyphState) {
+      glyphSpan.classList.remove('activated-heart');
+      glyphSpan.innerHTML = EMPTY_HEART;
+    } else {
+      callServer(glyphSpan);
+    }
+  });
+}
+
+function callServer(node) {
+  mimicServerCall()
+  .then( () => {
+    node.innerHTML = FULL_HEART;
+    node.classList.add('activated-heart');
+  })
+  .catch( e => {
+    errorDiv.className = '';
+    errorP.innerHTML = e;
+    setTimeout(() => errorDiv.className = 'hidden', 3000);
+  });
 }
 
 
